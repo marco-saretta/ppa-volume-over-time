@@ -1,34 +1,34 @@
-# PPA Volume over Time: A Bilevel Approach
+# PPA Volume over Time
 
-Marco Saretta, Jalal Kazempour
+Code and paper for a study of Power Purchase Agreements (PPAs) where only the cumulative volume over a period (e.g. one week) is contracted, and the hourly delivery path is a decision variable. Negotiated contract terms are modelled as a bilevel problem with a Nash bargaining upper level and a CVaR-aware lower level.
 
-## Overview
+Marco Saretta, Salvador Pineda Morente, Juan Miguel Morales Gonzalez, Jalal Kazempour
 
-This repository holds the code and paper for a study on Power Purchase Agreements (PPAs) in which the contracted volume must be delivered over a period (e.g. one week) rather than hour by hour.
+## Layout
 
-Standard PPAs (pay as consumed or baseload) fix the delivered volume every hour, leaving the seller exposed to volume risk whenever production does not match the profile. We introduce a third arrangement, volume over time, where only the cumulative volume over the period is contracted. The hourly delivery schedule becomes a decision variable (a delivery path), constrained by a delivery cap and a volume balance over the period.
-
-Four model variants follow from two modelling choices: whether the contract terms (strike price and volume) are exogenous or negotiated, and whether the delivery path is agreed jointly or nominated by one party. The negotiated cases are formulated as bilevel programmes, with a Nash Bargaining Solution at the upper level allocating utility between buyer and seller, and the delivery path chosen at the lower level. Party utilities can include a CVaR risk term alongside expected profit.
-
-## Repository structure
-
-```
-ppa_vot/        Python package with the analysis/simulation code
-overleaf/       Git submodule, linked to the Overleaf project for the paper
+```text
+ppa_vot/    Python package (models, data, figures)
+config/     Hydra configuration
+tests/      pytest tests
+notes/      Working notes
+overleaf/   Paper (git submodule, Overleaf project, Elsevier template)
 ```
 
 ## Setup
 
-This project uses [uv](https://docs.astral.sh/uv/) for Python dependency management.
+Requires [uv](https://docs.astral.sh/uv/) and a Gurobi licence.
 
-```
+```sh
+git clone --recurse-submodules git@github.com:marco-saretta/ppa-volume-over-time.git
+cd ppa-volume-over-time
 uv sync
-```
-
-This creates a `.venv` with the pinned dependencies from `uv.lock` (Gurobi, HiGHS, linopy, Hydra, numpy, pandas, polars, pyarrow among them).
-
-Run the entry point with:
-
-```
 uv run python -m ppa_vot.main
+```
+
+The `overleaf` submodule asks for credentials on first clone: username `git`, password an Overleaf git token (Account Settings, Git Integration). If you cloned without `--recurse-submodules`, run `git submodule update --init`.
+
+## Tests
+
+```sh
+uv run pytest
 ```

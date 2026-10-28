@@ -1,3 +1,3 @@
 [submodule "overleaf"]
 	path = overleaf
-	url = https://git.overleaf.com/6a63cb79c3112820b725078c
+	url = https://git@git.overleaf.com/6a63cb79c3112820b725078c
