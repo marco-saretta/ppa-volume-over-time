@@ -1,0 +1,7 @@
+# @package _global_
+# Merged into Hydra's default job logging. Drops milliseconds from timestamps.
+hydra:
+  job_logging:
+    formatters:
+      simple:
+        datefmt: "%Y-%m-%d %H:%M:%S"

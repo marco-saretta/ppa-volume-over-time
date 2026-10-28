@@ -10,8 +10,7 @@ dependencies = [
     "hydra-core>=1.3.5",
     "linopy>=0.9.0",
     "matplotlib>=3.11.1",
-    "pyarrow>=25.0.0",
-    "requests>=2.34.2",
+    "pytest>=9.1.1",
 ]
 
 [dependency-groups]
@@ -37,3 +36,7 @@ warn_redundant_casts = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[build-system]
+requires = ["uv_build>=0.11.0,<0.12"]
+build-backend = "uv_build"
