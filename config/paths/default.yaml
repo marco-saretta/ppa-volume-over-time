@@ -1,0 +1,11 @@
+# @package paths
+# All paths are absolute, built from the folder you launch main.py from (the repo root).
+# Override on the command line, e.g.: uv run main.py paths.data=/some/other/dir
+
+root: "${hydra:runtime.cwd}"
+
+# Input data
+data: "${paths.root}/data"
+
+# Folder of the current run (outputs/<date>/<time>/), where Hydra writes main.log
+run: "${hydra:runtime.output_dir}"

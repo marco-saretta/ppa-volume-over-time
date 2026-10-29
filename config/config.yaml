@@ -1,5 +1,4 @@
 defaults:
+  - paths: default
   - logger: default
   - _self_
-
-# Path variables
