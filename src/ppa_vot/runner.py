@@ -15,27 +15,27 @@ class Runner:
     def run_pipeline(self):
         with stage("preprocess"):
             self.preprocess_data()
-        with stage("load data"):
+        with stage("load_data"):
             self.load_data()
-        with stage("build model"):
+        with stage("build_model"):
             self.build_model()
         with stage("solve"):
             self.solve_model()
-        with stage("export data"):
+        with stage("export_data"):
             self.export_data()
 
     def preprocess_data(self):
-        DataPreprocessor()
+        DataPreprocessor(config=self.cfg)
 
     def load_data(self):
         log.info("Set up DataLoader")
-        self.data = DataLoader(cfg=self.cfg)
+        self.data = DataLoader(config=self.cfg)
 
     def build_model(self):
-        self.model = BilevelModel()
+        self.model = BilevelModel(config=self.cfg, data=self.data)
 
     def solve_model(self):
         self.model.solve()
 
     def export_data(self):
-        DataExporter()
+        DataExporter(config=self.cfg)
