@@ -1,9 +1,10 @@
-from logging import getLogger
+import logging
 
 from .data_ops import DataExporter, DataLoader, DataPreprocessor
 from .model import BilevelModel
+from .utils import stage
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class Runner:
@@ -12,12 +13,16 @@ class Runner:
         log.info("Runner instantiated")
 
     def run_pipeline(self):
-        log.info("Running pipeline")
-        self.preprocess_data()
-        self.load_data()
-        self.build_model()
-        self.solve_model()
-        self.export_data()
+        with stage("preprocess"):
+            self.preprocess_data()
+        with stage("load data"):
+            self.load_data()
+        with stage("build model"):
+            self.build_model()
+        with stage("solve"):
+            self.solve_model()
+        with stage("export data"):
+            self.export_data()
 
     def preprocess_data(self):
         DataPreprocessor()
