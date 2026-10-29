@@ -2,6 +2,12 @@
 notes/
 overleaf/
 
+# Data / generated outputs
+/data/
+outputs/
+results/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -228,8 +234,3 @@ Desktop.ini
 
 # Editor
 .vscode/
-
-# Data / generated outputs
-data/
-outputs/
-results/
