@@ -1,8 +1,8 @@
-from logging import getLogger
+import logging
 
 import gurobipy as gp
 
-log = getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class BilevelModel:
@@ -12,3 +12,6 @@ class BilevelModel:
     def configure_model(self):
         self.m = gp.Model()
         log.info("model setup")
+
+    def solve(self):
+        self.m.optimize()
