@@ -29,7 +29,7 @@ class Runner:
 
     def load_data(self):
         log.info("Set up DataLoader")
-        self.data = DataLoader(config=self.cfg)
+        self.data = DataLoader(cfg=self.cfg)
 
     def build_model(self):
         self.model = BilevelModel(config=self.cfg, data=self.data)
