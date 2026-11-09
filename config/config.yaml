@@ -1,4 +1,6 @@
 defaults:
   - paths: default
+  - data: default
   - logger: default
+  - simulations: demo
   - _self_

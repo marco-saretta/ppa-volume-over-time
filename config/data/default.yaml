@@ -1,0 +1,15 @@
+# @package data
+# Time window in UTC, `end` exclusive: 48 full weeks, Monday 2025-10-06 to Sunday 2026-09-06.
+# DK1 day-ahead prices on Energinet start on 2025-10-01.
+# Raw files are named after the window: change it and they are downloaded again.
+
+start: "2025-10-06"
+end: "2026-09-07"
+
+api_url: "https://api.energidataservice.dk/dataset"
+
+# Regions in the DK1 price area (Hovedstaden and Sjaelland are DK2)
+dk1_regions:
+  - "Region Midtjylland"
+  - "Region Nordjylland"
+  - "Region Syddanmark"
