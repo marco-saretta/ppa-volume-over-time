@@ -6,8 +6,8 @@ name: demo
 
 # ---- scenarios -------------------------------------------------------------
 data:
-  scenarios: 50             # |Omega|, bootstrapped scenarios (test size; final: 100)
-  weeks: 10                 # |T|, weeks per scenario, drawn from history (test size; final: 48)
+  scenarios: 150             # |Omega|, bootstrapped scenarios (test size; final: 100)
+  weeks: 4                 # |T|, weeks per scenario, drawn from history (test size; final: 48)
   seed: 42                  # random seed of the bootstrap
 
   player_size:

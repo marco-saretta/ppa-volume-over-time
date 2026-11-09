@@ -1,10 +1,11 @@
 import logging
 from dataclasses import dataclass, field
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from omegaconf import DictConfig
+
+from .data_preprocessor import scenario_dir
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ class DataLoader:
 
         Each file has rows (week, hour) and one column per scenario.
         """
-        proc_dir = Path(self.cfg.paths.data) / "processed"
+        proc_dir = scenario_dir(self.cfg)
 
         def tensor(name: str) -> np.ndarray:
             df = pd.read_csv(proc_dir / f"{name}.csv", index_col=["week", "hour"])

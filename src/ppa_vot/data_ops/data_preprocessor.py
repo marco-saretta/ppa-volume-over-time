@@ -11,8 +11,15 @@ from omegaconf import DictConfig, OmegaConf
 log = logging.getLogger(__name__)
 
 HOURS_PER_WEEK = 168
-SETTINGS_FILE = "settings.json"  # settings used for the files in data/processed/
+SETTINGS_FILE = "settings.json"  # settings used for the files in a scenario folder
 MAX_GAP_HOURS = 2  # shorter wind gaps are interpolated; weeks with longer gaps are not drawn
+
+
+def scenario_dir(cfg: DictConfig) -> Path:
+    """Folder of one scenario set, e.g. data/processed/100_sc_4_weeks_seed42/."""
+    sim = cfg.simulations.data
+    name = f"{sim.scenarios}_sc_{sim.weeks}_weeks_seed{sim.seed}"
+    return Path(cfg.paths.data) / "processed" / name
 
 
 class DataPreprocessor:
@@ -47,7 +54,7 @@ class DataPreprocessor:
         self.data_dir = Path(self.cfg.paths.data)
         self.raw_dir = self.data_dir / "raw"
         self.raw_dir.mkdir(parents=True, exist_ok=True)
-        self.proc_dir = self.data_dir / "processed"
+        self.proc_dir = scenario_dir(self.cfg)  # one folder per scenario set
         self.proc_dir.mkdir(exist_ok=True, parents=True)
         log.info("Data directories created")
 
