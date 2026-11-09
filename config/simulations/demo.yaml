@@ -6,8 +6,8 @@ name: demo
 
 # ---- scenarios -------------------------------------------------------------
 data:
-  scenarios: 100            # |Omega|, bootstrapped scenarios
-  weeks: 48                 # |T|, weeks per scenario, drawn from history
+  scenarios: 50             # |Omega|, bootstrapped scenarios (test size; final: 100)
+  weeks: 10                 # |T|, weeks per scenario, drawn from history (test size; final: 48)
   seed: 42                  # random seed of the bootstrap
 
   player_size:
@@ -17,19 +17,19 @@ data:
 # ---- model -----------------------------------------------------------------
 model:
   NBS:
-    bargaining_power_G: 0.5 # tau^G (tau^L = 1 - tau^G)
+    tau_G: 0.5              # Bargaining power seller (tau^L = 1 - tau^G)
     epsilon: 1e-5           # minimum surplus w^G, w^L
 
   risk_aversion:
-    alpha_G: 0.95           # CVaR level, generator
+    alpha_G: 0.9           # CVaR level, generator
     beta_G: 0.5             # risk-aversion weight, generator
-    alpha_L: 0.95           # CVaR level, load
+    alpha_L: 0.9           # CVaR level, load
     beta_L: 0.5             # risk-aversion weight, load
 
   contract:
     strike_lower: 0         # EUR/MWh, lower bound on S
     strike_upper: 200       # EUR/MWh, upper bound on S
     volume_lower: 0         # MWh per week, lower bound on V
-    volume_upper: 50        # MWh per week, upper bound on V
+    volume_upper: 600        # MWh per week, upper bound on V
     quota_lower: 0.1        # MWh per hour, floor on q
     quota_upper: 10         # MWh per hour, cap on q

@@ -39,14 +39,20 @@ class DataLoader:
     sc_p_L: np.ndarray = field(init=False, repr=False)  # load consumption P^L, MWh
     pi: np.ndarray = field(init=False, repr=False)  # scenario probability, shape (n_Omega,)
 
+    # disagreement point: utility without the contract (q = 0, no payment)
+    d_G: float = field(init=False)
+    d_L: float = field(init=False)
+    W_max: float = field(init=False)  # upper bound on the joint surplus of any contract
+
     def __post_init__(self):
         self.hydra_params()
         self.load_scenarios()
+        self.disagreement_point()
 
     def hydra_params(self):
         sim = self.cfg.simulations.model
         self.epsilon = sim.NBS.epsilon
-        self.tau_G = sim.NBS.bargaining_power_G
+        self.tau_G = sim.NBS.tau_G
 
         self.alpha_G = sim.risk_aversion.alpha_G
         self.beta_G = sim.risk_aversion.beta_G
@@ -86,3 +92,29 @@ class DataLoader:
         log.info(
             "Scenarios loaded: |H| = %d, |T| = %d, |Omega| = %d", self.n_H, self.n_T, self.n_Omega
         )
+
+    def disagreement_point(self):
+        """d^G, d^L: mean-CVaR utility of the merchant earnings (eq:disagreement)."""
+        # merchant net earnings per scenario, summed over hours and weeks: shape (n_Omega,)
+        phi_G = (self.sc_prices * self.sc_p_G).sum(axis=(0, 1))
+        phi_L = -(self.sc_prices * self.sc_p_L).sum(axis=(0, 1))
+        self.d_G = self.mean_cvar(phi_G, self.alpha_G, self.beta_G)
+        self.d_L = self.mean_cvar(phi_L, self.alpha_L, self.beta_L)
+        log.info("Disagreement point: d_G = %.0f, d_L = %.0f", self.d_G, self.d_L)
+
+        # No contract has a larger joint surplus: CVaR <= mean, so u_G + u_L <= E[phi_G + phi_L],
+        # and in phi_G + phi_L the payment z and lambda q cancel, leaving the merchant positions
+        self.W_max = float(self.pi @ (phi_G + phi_L)) - self.d_G - self.d_L
+        log.info("Upper bound on the joint surplus: W_max = %.0f", self.W_max)
+
+    def mean_cvar(self, phi: np.ndarray, alpha: float, beta: float) -> float:
+        """(1 - beta) E[phi] + beta CVaR_alpha[phi], CVaR = mean of the worst (1 - alpha) mass."""
+        tail_mass, tail_sum = 1 - alpha, 0.0
+        for w in np.argsort(phi):  # worst scenario first
+            take = min(self.pi[w], tail_mass)  # the last scenario may enter only in part
+            tail_sum += take * phi[w]
+            tail_mass -= take
+            if tail_mass <= 1e-12:
+                break
+        cvar = tail_sum / (1 - alpha)
+        return (1 - beta) * float(self.pi @ phi) + beta * cvar

@@ -6,11 +6,12 @@ from urllib.request import urlopen
 
 import numpy as np
 import pandas as pd
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
 log = logging.getLogger(__name__)
 
 HOURS_PER_WEEK = 168
+SETTINGS_FILE = "settings.json"  # settings used for the files in data/processed/
 MAX_GAP_HOURS = 2  # shorter wind gaps are interpolated; weeks with longer gaps are not drawn
 
 
@@ -34,8 +35,12 @@ class DataPreprocessor:
 
         # methods
         self.setup_dirs()
+        if self.scenarios_exist():
+            log.info("Scenarios in %s already match the config: skipping", self.proc_dir)
+            return
         self.fetch_data()
         self.preprocess_data()
+        self.save_settings()
 
     def setup_dirs(self):
         self.root_dir = Path(self.cfg.paths.root)
@@ -45,6 +50,28 @@ class DataPreprocessor:
         self.proc_dir = self.data_dir / "processed"
         self.proc_dir.mkdir(exist_ok=True, parents=True)
         log.info("Data directories created")
+
+    # ---- skip if the scenarios exist ----------------------------------------------------------
+    def settings(self) -> dict:
+        """Config entries the scenarios depend on: data window and simulations.data."""
+        return {
+            "start": self.cfg.data.start,
+            "end": self.cfg.data.end,
+            **OmegaConf.to_container(self.cfg.simulations.data, resolve=True),
+        }
+
+    def scenarios_exist(self) -> bool:
+        """True if the three files exist and were built with the current settings."""
+        files = [self.proc_dir / f"{n}.csv" for n in ("prices", "production", "consumption")]
+        stamp = self.proc_dir / SETTINGS_FILE
+        if not stamp.exists() or not all(f.exists() for f in files):
+            return False
+        with open(stamp) as f:
+            return json.load(f) == self.settings()
+
+    def save_settings(self):
+        with open(self.proc_dir / SETTINGS_FILE, "w") as f:
+            json.dump(self.settings(), f, indent=2)
 
     def fetch_data(self):
         self.raw_prices = self.download(
