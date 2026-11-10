@@ -38,4 +38,4 @@ class Runner:
         self.model.solve()
 
     def export_data(self):
-        DataExporter(config=self.cfg)
+        DataExporter(cfg=self.cfg, model=self.model)
