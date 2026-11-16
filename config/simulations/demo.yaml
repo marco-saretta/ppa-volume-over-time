@@ -6,8 +6,8 @@ name: demo
 
 # ---- scenarios -------------------------------------------------------------
 data:
-  scenarios: 150             # |Omega|, bootstrapped scenarios (test size; final: 100)
-  weeks: 4                 # |T|, weeks per scenario, drawn from history (test size; final: 48)
+  scenarios: 100             # |Omega|, bootstrapped scenarios (test size; final: 100)
+  weeks: 5                 # |T|, weeks per scenario, drawn from history (test size; final: 48)
   seed: 42                  # random seed of the bootstrap
 
   player_size:
@@ -33,3 +33,7 @@ model:
     volume_upper: 600        # MWh per week, upper bound on V
     quota_lower: 0.1        # MWh per hour, floor on q
     quota_upper: 10         # MWh per hour, cap on q
+
+  binary_expansion:          # how the bilinear term rho V in strong duality is handled
+    do: true                # true: binary expansion of V (MILP); false: bilinear rho V (Gurobi NonConvex)
+    delta_V: 1              # MWh per week, grid step of V; digits K = ceil(log2(volume_upper / delta_V + 1))

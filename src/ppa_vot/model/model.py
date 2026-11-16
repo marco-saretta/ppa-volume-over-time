@@ -60,6 +60,14 @@ class BilevelModel:
         self.v.mu_u = self.m.addMVar(lam.shape, lb=0, ub=spread, name="mu_u")  # cap
         self.v.mu_l = self.m.addMVar(lam.shape, lb=0, ub=spread, name="mu_l")  # floor
 
+        # Binary expansion of V (eq:sl_vexp): V = delta_V sum_k 2^k z_k, xi_k = rho z_k
+        if data.binary:
+            n_K = int(np.ceil(np.log2(data.volume_upper / data.delta_V + 1)))  # digits
+            self.weights = data.delta_V * 2.0 ** np.arange(n_K)  # delta_V 2^k, shape (n_K,)
+            self.v.z = self.m.addMVar(n_K, vtype=gp.GRB.BINARY, name="z")
+            self.v.xi = self.m.addMVar((n_K, data.n_T, data.n_Omega), lb=-INF, name="xi")
+            log.info("binary expansion: %d digits, delta_V = %g", n_K, data.delta_V)
+
         # Risk aversion variables (CVaR)
         self.v.zeta_G = self.m.addVar(lb=-INF, name="zeta_G")
         self.v.zeta_L = self.m.addVar(lb=-INF, name="zeta_L")
@@ -113,14 +121,24 @@ class BilevelModel:
         # Dual feasibility
         self.m.addConstr(data.sc_prices - v.rho + v.mu_u - v.mu_l == 0)
 
-        # Strong duality THAT NAUGHTY CONSTRAINT
+        # Strong duality THAT NAUGHTY CONSTRAINT: rho V is linearised or left bilinear
+        if data.binary:
+            lam_min = data.sc_prices.min(axis=0)  # (t, omega), = lb of rho (eq:sl_rho_bounds)
+            lam_max = data.sc_prices.max(axis=0)  # (t, omega), = ub of rho
+            z = v.z.reshape(-1, 1, 1)  # (k, 1, 1), broadcasts against xi (k, t, omega)
+            self.m.addConstr(v.V == self.weights @ v.z)  # eq:sl_vexp
+            self.m.addConstr(v.xi >= lam_min * z)  # eq:sl_xi_z
+            self.m.addConstr(v.xi <= lam_max * z)
+            self.m.addConstr(v.xi >= v.rho - lam_max * (1 - z))  # eq:sl_xi_rho
+            self.m.addConstr(v.xi <= v.rho - lam_min * (1 - z))
+            rho_V = (self.weights.reshape(-1, 1, 1) * v.xi).sum(axis=0)  # (t, omega), linear
+        else:
+            rho_V = v.rho * v.V  # bilinear: Gurobi solves it as a nonconvex MIQCP
         self.m.addConstr(
             (data.sc_prices * v.q).sum(axis=0)
-            == v.rho * v.V
-            - data.quota_upper * v.mu_u.sum(axis=0)
-            + data.quota_lower * v.mu_l.sum(axis=0)
+            == rho_V - data.quota_upper * v.mu_u.sum(axis=0) + data.quota_lower * v.mu_l.sum(axis=0)
         )
-        log.info("constraints added")
+        log.info("constraints added (binary expansion: %s)", data.binary)
 
     def add_objective(self):
         self.m.setObjective(
@@ -131,3 +149,24 @@ class BilevelModel:
     def solve(self):
         # self.m.Params.TimeLimit = 1800  # seconds; the exporter keeps the best solution found
         self.m.optimize()
+        m = self.m
+        # Runtime is wall clock (inflated by suspends); Work is deterministic, use it to compare
+        log.info(
+            "Gurobi (binary expansion: %s): status %d, runtime %.1f s, work %.1f units, "
+            "%d binaries, %d constraints",
+            self.data.binary,
+            m.Status,
+            m.Runtime,
+            m.Work,
+            m.NumBinVars,
+            m.NumConstrs,
+        )
+        if m.SolCount > 0:
+            gap = m.MIPGap if m.IsMIP else 0.0
+            log.info(
+                "objective %.6f, gap %.2e, V %.2f, S %.3f",
+                m.ObjVal,
+                gap,
+                self.v.V.X,
+                self.v.aux_sv.X / max(self.v.V.X, 1e-9),
+            )

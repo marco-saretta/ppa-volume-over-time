@@ -28,6 +28,8 @@ class DataLoader:
     volume_upper: float = field(init=False)
     quota_lower: float = field(init=False)
     quota_upper: float = field(init=False)
+    binary: bool = field(init=False)  # True: binary expansion of V; False: bilinear rho V
+    delta_V: float = field(init=False)  # grid step of V in the binary expansion
 
     # cardinalities of the sets H (hours of a week), T (weeks), Omega (scenarios)
     n_H: int = field(init=False)
@@ -66,6 +68,8 @@ class DataLoader:
         self.volume_upper = sim.contract.volume_upper
         self.quota_lower = sim.contract.quota_lower
         self.quota_upper = sim.contract.quota_upper
+        self.binary = sim.binary_expansion.do
+        self.delta_V = sim.binary_expansion.delta_V
         log.info("Parameters read from cfg.simulations.model (%s)", self.cfg.simulations.name)
 
     def load_scenarios(self):
