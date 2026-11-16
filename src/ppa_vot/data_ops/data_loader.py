@@ -18,6 +18,7 @@ class DataLoader:
     # parameters
     epsilon: float = field(init=False)
     tau_G: float = field(init=False)
+    objective: str = field(init=False)  # 'nbs' (log objective) or 'joint' (max W, then NBS split)
     alpha_G: float = field(init=False)
     beta_G: float = field(init=False)
     alpha_L: float = field(init=False)
@@ -56,6 +57,8 @@ class DataLoader:
         sim = self.cfg.simulations.model
         self.epsilon = sim.NBS.epsilon
         self.tau_G = sim.NBS.tau_G
+        self.objective = sim.NBS.objective
+        assert self.objective in ("nbs", "joint"), f"unknown objective {self.objective}"
 
         self.alpha_G = sim.risk_aversion.alpha_G
         self.beta_G = sim.risk_aversion.beta_G

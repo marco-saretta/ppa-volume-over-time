@@ -44,6 +44,22 @@ class DataExporter:
 
         V = scalars["V"]
         scalars["S"] = scalars["aux_sv"] / V if V > 1e-9 else float("nan")  # strike from z = S V
+        # exact NBS split: w_G = tau_G W. u_G moves one-for-one with n_T * aux_sv (mean-CVaR is
+        # translation equivariant), so the payment is shifted to reach it. With objective 'joint'
+        # this IS the strike (the solver's split is arbitrary); with 'nbs' it removes the gap noise.
+        data = self.model.data
+        W = scalars["w_G"] + scalars["w_L"]
+        aux_sv_nbs = scalars["aux_sv"] + (data.tau_G * W - scalars["w_G"]) / data.n_T
+        scalars["S_nbs"] = aux_sv_nbs / V if V > 1e-9 else float("nan")
+        if data.objective == "joint":
+            scalars["S_solver"] = scalars["S"]
+            scalars["S"] = scalars["S_nbs"]
+            scalars["w_G"], scalars["w_L"] = data.tau_G * W, (1 - data.tau_G) * W
+        if not data.strike_lower <= scalars["S_nbs"] <= data.strike_upper:
+            log.warning(
+                "NBS strike %.3f outside the strike bounds: the split is not exact",
+                scalars["S_nbs"],
+            )
         scalars.update(status=m.Status, objective=m.ObjVal, runtime=m.Runtime)
         try:
             scalars.update(bound=m.ObjBound, gap=m.MIPGap)  # only for models solved by branching

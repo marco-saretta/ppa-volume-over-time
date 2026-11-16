@@ -32,10 +32,11 @@ class BilevelModel:
         # surplus in [epsilon, W_max]: no contract creates more than W_max (see DataLoader)
         self.v.w_G = self.m.addVar(lb=data.epsilon, ub=data.W_max, name="w_G")
         self.v.w_L = self.m.addVar(lb=data.epsilon, ub=data.W_max, name="w_L")
-        # ln w, for the NBS objective
-        ln_lb, ln_ub = np.log(data.epsilon), np.log(data.W_max)
-        self.v.ln_w_G = self.m.addVar(lb=ln_lb, ub=ln_ub, name="ln_w_G")
-        self.v.ln_w_L = self.m.addVar(lb=ln_lb, ub=ln_ub, name="ln_w_L")
+        # ln w, for the NBS objective only
+        if data.objective == "nbs":
+            ln_lb, ln_ub = np.log(data.epsilon), np.log(data.W_max)
+            self.v.ln_w_G = self.m.addVar(lb=ln_lb, ub=ln_ub, name="ln_w_G")
+            self.v.ln_w_L = self.m.addVar(lb=ln_lb, ub=ln_ub, name="ln_w_L")
         self.v.u_G = self.m.addVar(lb=-INF, name="u_G")  # mean-CVaR utility
         self.v.u_L = self.m.addVar(lb=-INF, name="u_L")
         self.v.phi_G = self.m.addMVar(data.n_Omega, lb=-INF, name="phi_G")  # net earnings
@@ -83,9 +84,10 @@ class BilevelModel:
         self.m.addConstr(v.w_G == v.u_G - data.d_G)
         self.m.addConstr(v.w_L == v.u_L - data.d_L)
 
-        # Surplus log equivalence
-        self.m.addGenConstrLog(v.w_G, v.ln_w_G)
-        self.m.addGenConstrLog(v.w_L, v.ln_w_L)
+        # Surplus log equivalence (NBS objective only)
+        if data.objective == "nbs":
+            self.m.addGenConstrLog(v.w_G, v.ln_w_G)
+            self.m.addGenConstrLog(v.w_L, v.ln_w_L)
 
         # Utilities
         self.m.addConstr(
@@ -141,10 +143,15 @@ class BilevelModel:
         log.info("constraints added (binary expansion: %s)", data.binary)
 
     def add_objective(self):
-        self.m.setObjective(
-            expr=self.data.tau_G * self.v.ln_w_G + (1 - self.data.tau_G) * self.v.ln_w_L,
-            sense=gp.GRB.MAXIMIZE,
-        )
+        v, tau_G = self.v, self.data.tau_G
+        if self.data.objective == "nbs":
+            expr = tau_G * v.ln_w_G + (1 - tau_G) * v.ln_w_L
+        else:
+            # joint surplus: the strike is a transfer, so the NBS volume maximises W;
+            # the exporter sets the strike afterwards from w_G = tau_G W
+            expr = v.w_G + v.w_L
+        self.m.setObjective(expr=expr, sense=gp.GRB.MAXIMIZE)
+        log.info("objective: %s", self.data.objective)
 
     def solve(self):
         # self.m.Params.TimeLimit = 1800  # seconds; the exporter keeps the best solution found
