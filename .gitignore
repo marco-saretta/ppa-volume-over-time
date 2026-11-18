@@ -6,6 +6,7 @@ overleaf/
 /data/
 outputs/
 results/
+presentations/*
 
 
 # Byte-compiled / optimized / DLL files
