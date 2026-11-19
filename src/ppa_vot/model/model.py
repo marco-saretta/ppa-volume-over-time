@@ -30,6 +30,9 @@ class BilevelModel:
         self.m.setParam("NumericFocus", solver_dict.NumericFocus)
         self.m.setParam("FeasibilityTol", solver_dict.FeasibilityTol)
         self.m.setParam("OptimalityTol", solver_dict.OptimalityTol)
+        self.m.setParam("Cuts", solver_dict.Cuts)
+        self.m.setParam("Presolve", solver_dict.Presolve)
+        self.m.setParam("TimeLimit", solver_dict.TimeLimit)
 
         log.info("model setup")
 

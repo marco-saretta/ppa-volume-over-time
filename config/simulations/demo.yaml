@@ -36,7 +36,7 @@ model:
     quota_upper: 10         # MWh per hour, cap on q
 
     guess:
-      do: true
+      do: false
       strike: 25
       volume: 350
 
@@ -51,3 +51,6 @@ solver:                    # Gurobi parameters, passed as they are (names as in 
   NumericFocus: 0          # Gurobi default 0     (range 0 to 3), 0 automatic, 3 most careful with numerics
   FeasibilityTol: 1e-6     # Gurobi default 1e-6  (range 1e-9 to 1e-2), primal feasibility tolerance
   OptimalityTol: 1e-6      # Gurobi default 1e-6  (range 1e-9 to 1e-2), dual feasibility tolerance
+  Cuts: -1                 # Gurobi default -1    (range -1 to 3), -1 automatic, 0 no cuts, 3 very aggressive
+  Presolve: -1             # Gurobi default -1    (range -1 to 2), -1 automatic, 0 off, 2 aggressive
+  TimeLimit: .inf          # Gurobi default inf   (seconds), the exporter keeps the best solution found
