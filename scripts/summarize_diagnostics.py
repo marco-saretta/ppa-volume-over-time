@@ -28,8 +28,6 @@ from ppa_vot.data_ops import DataLoader
 
 # overrides not shown: the same in every run
 HIDE = {
-    "simulations.data.scenarios",
-    "simulations.data.weeks",
     "simulations.model.binary_expansion.do",
     "simulations.model.contract.guess.do",
     "simulations.solver.MIPGap",
@@ -37,6 +35,8 @@ HIDE = {
 }
 # overrides not shown when at the base value
 BASE = {
+    "simulations.data.scenarios": "100",
+    "simulations.data.weeks": "3",
     "simulations.solver.NumericFocus": "0",
     "simulations.solver.FeasibilityTol": "1e-6",
     "simulations.solver.OptimalityTol": "1e-6",

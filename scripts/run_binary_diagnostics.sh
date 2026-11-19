@@ -2,20 +2,22 @@
 # Why does the binary expansion return a wrong V?  Diagnostics, 2026-11-19.
 #
 # Setting: binary expansion, 3 weeks x 100 scenarios, MIPGap 1e-6. The exact sweep gives V* = 357
-# (W 7201.26). Group A (objective nbs/joint x NumericFocus 0/3, multirun/binary_diag/A_*) is done:
-# all four runs wrong (V 283, 262, 327, 315), each with gap 0. Every returned V has a better
-# neighbour V+1, and the region of V* is discarded in the last nodes as "infeasible" or "cutoff".
+# (W 7201.26). Each group runs the joint objective first (faster), then nbs.
 #
-# Groups still to run (each: joint objective first, it is faster, then nbs):
-#   C  V fixed at 357            sanity check of the setup, about a minute
-#   E  Cuts = 0                  are the root cuts cutting off V*?
-#   F  Presolve = 0              are presolve reductions cutting off V*?
-#   B  tolerances 1e-9           is it the feasibility / optimality tolerance?
-#   D  V restricted to [300,400] does a small search range find V*?
-#   G  Cuts = 0 and Presolve = 0 joint only, in case E and F alone do not settle it
+# Done (results in multirun/binary_diag, summary below):
+#   A  objective x NumericFocus 0/3  all wrong (V 283, 262, 327, 315), gap 0
+#   B  tolerances 1e-9               worse (V 139, 135)
+#   C  V fixed at 357                right
+#   D  V restricted to [300,400]     wrong (V 314; joint found only W = 0)
+#   E  Cuts = 0                      wrong, closer (V 328, 348)
+#   F  Presolve = 0                  RIGHT (V 357, both objectives), joint in 82 s
+#   G  Cuts = 0 and Presolve = 0     right (joint)
+# So presolve removes the optimum. Still to run:
+#   H  Presolve = 1 or 2 (joint)     is it a conservative or an aggressive presolve reduction?
+#   I  Presolve = 0 on 5x100, 3x150  does the fix hold where binary failed before? (V* 302, 369)
 #
 # Usage, from anywhere:
-#   bash scripts/run_binary_diagnostics.sh          # all groups, in the order C E F B D G
+#   bash scripts/run_binary_diagnostics.sh          # every group not done yet (C E F B D G H I)
 #   bash scripts/run_binary_diagnostics.sh E F      # only some groups
 #   uv run python scripts/summarize_diagnostics.py  # table of every run, checked against the sweep
 #
@@ -86,7 +88,7 @@ both() {  # both <group> key=value ...: joint objective (n = 1) first, then nbs 
   run_one "$g/0" simulations.model.NBS.objective=nbs "$@"
 }
 
-for g in ${*:-C E F B D G}; do
+for g in ${*:-C E F B D G H I}; do
   case $g in
     C) both C_fixed_V357 \
          simulations.model.contract.volume_lower=357 simulations.model.contract.volume_upper=357 ;;
@@ -97,8 +99,14 @@ for g in ${*:-C E F B D G}; do
          simulations.model.contract.volume_lower=300 simulations.model.contract.volume_upper=400 ;;
     G) run_one G_cuts_presolve_off/1 simulations.model.NBS.objective=joint \
          simulations.solver.Cuts=0 simulations.solver.Presolve=0 ;;
+    H) run_one H_presolve_conservative/1 simulations.model.NBS.objective=joint simulations.solver.Presolve=1
+       run_one H_presolve_aggressive/1 simulations.model.NBS.objective=joint simulations.solver.Presolve=2 ;;
+    I) both I_presolve_off_5x100 simulations.solver.Presolve=0 \
+         simulations.data.scenarios=100 simulations.data.weeks=5
+       both I_presolve_off_3x150 simulations.solver.Presolve=0 \
+         simulations.data.scenarios=150 simulations.data.weeks=3 ;;
     A) echo "--- group A is done (multirun/binary_diag/A_objective_numericfocus), not rerun" ;;
-    *) echo "unknown group $g (use C E F B D G)" ;;
+    *) echo "unknown group $g (use C E F B D G H I)" ;;
   esac
 done
 

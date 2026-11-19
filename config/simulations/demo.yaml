@@ -52,5 +52,7 @@ solver:                    # Gurobi parameters, passed as they are (names as in 
   FeasibilityTol: 1e-6     # Gurobi default 1e-6  (range 1e-9 to 1e-2), primal feasibility tolerance
   OptimalityTol: 1e-6      # Gurobi default 1e-6  (range 1e-9 to 1e-2), dual feasibility tolerance
   Cuts: -1                 # Gurobi default -1    (range -1 to 3), -1 automatic, 0 no cuts, 3 very aggressive
-  Presolve: -1             # Gurobi default -1    (range -1 to 2), -1 automatic, 0 off, 2 aggressive
+  Presolve: 0              # Gurobi default -1    (range -1 to 2), -1 automatic, 0 off, 2 aggressive
+                           # keep 0 with the binary expansion: with presolve on (any level) Gurobi 13 and 14
+                           # return a wrong V with gap 0 (scripts/run_binary_diagnostics.sh, 2026-11-19)
   TimeLimit: .inf          # Gurobi default inf   (seconds), the exporter keeps the best solution found
