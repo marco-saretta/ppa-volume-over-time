@@ -244,13 +244,13 @@ wheels = [
 
 [[package]]
 name = "gurobipy"
-version = "13.0.2"
+version = "14.0.0"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/de/d32f793c5c208f34b289049c05fbc003ed5c6818e7e84c113651992cc923/gurobipy-13.0.2-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:6cc4be757540f48b3f206427cacbcd78f5e8c07dddd8654e3b1c6e3b87327082", size = 15978090, upload-time = "2026-05-05T10:43:18.396Z" },
-    { url = "https://files.pythonhosted.org/packages/a5/11/77458930745fb661a0b5aea39211101a22c5413161bb10f954f015af3f70/gurobipy-13.0.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:1d7840fdf7928a6faf9fff795dde727940164e87d0bced98075df1ead38b12f9", size = 14866672, upload-time = "2026-05-05T10:43:21.508Z" },
-    { url = "https://files.pythonhosted.org/packages/79/08/70c909650ae684a4d8468fec8b2e5d2f3be5b7f602e48b3cffd1e67ee6cc/gurobipy-13.0.2-cp313-cp313-manylinux_2_26_aarch64.whl", hash = "sha256:407f87b87b556b2d73f738ca4b9a41c3aed0ee412958a68b127d2108a8c300e2", size = 87208386, upload-time = "2026-05-05T10:43:26.333Z" },
-    { url = "https://files.pythonhosted.org/packages/fd/7f/e68bd10b04c87f60d82f0d81340cf23e6e8d5e012dbac474dffbdf990657/gurobipy-13.0.2-cp313-cp313-win_amd64.whl", hash = "sha256:5b26c7ab11fd406f6ecf10958728b9f9344b818fee86db5b516a46aefe8400f2", size = 11244495, upload-time = "2026-05-05T10:43:29.624Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/bf/0088667900455a2919660a518f3515f8e0b2fb8541b224ff5f48a69ec5fa/gurobipy-14.0.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:c215641a34d7ce6e97f6e6d718ce8bb9e38eecab58ebd9cd0e1b78f5895aa8a1", size = 16661329, upload-time = "2026-11-10T13:05:17.06Z" },
+    { url = "https://files.pythonhosted.org/packages/11/52/dfe3dd6a90ea061ddc3b014ac299cc47d6050e72b09b20b1afbc869330ae/gurobipy-14.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:62ff053deb19514e52165f270241bb3a22caebfdce733c5f8d45306d41344497", size = 14164309, upload-time = "2026-11-10T13:05:19.955Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/d4/694151b1146ad697df3fdcbed58b8a3c2dad1078614539af4f287d70b983/gurobipy-14.0.0-cp313-cp313-manylinux_2_26_aarch64.whl", hash = "sha256:acb835c074eba47f39a2e0dfb3a00fae9421a74fce3d3bee477d1cab932b8c0d", size = 28077955, upload-time = "2026-11-10T13:05:22.987Z" },
+    { url = "https://files.pythonhosted.org/packages/1c/dc/65221cda1e76072495b931bf73a7758a838af1c1c4247dcfb046031c4809/gurobipy-14.0.0-cp313-cp313-win_amd64.whl", hash = "sha256:e27531d3450503a594248f81d77513a25fc25a6d8495454faa159f9aa8db4e48", size = 10374555, upload-time = "2026-11-10T13:05:25.526Z" },
 ]
 
 [[package]]
@@ -664,7 +664,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gurobipy", specifier = "==13.0.2" },
+    { name = "gurobipy", specifier = "==14.0.0" },
     { name = "highspy", specifier = ">=1.15.1" },
     { name = "hydra-core", specifier = ">=1.3.5" },
     { name = "linopy", specifier = ">=0.9.0" },

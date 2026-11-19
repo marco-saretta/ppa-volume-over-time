@@ -19,7 +19,7 @@ model:
   NBS:
     tau_G: 0.5              # Bargaining power seller (tau^L = 1 - tau^G)
     epsilon: 1e-5           # minimum surplus w^G, w^L
-    objective: joint        # nbs: max tau ln w_G + tau_L ln w_L; joint: max W = w_G + w_L, then w_G = tau_G W
+    objective: nbs          # nbs: max tau ln w_G + tau_L ln w_L; joint: max W = w_G + w_L, then w_G = tau_G W
 
   risk_aversion:
     alpha_G: 0.9           # CVaR level, generator
