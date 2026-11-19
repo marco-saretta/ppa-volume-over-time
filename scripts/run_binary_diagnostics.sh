@@ -48,7 +48,8 @@ declare -A BASE=(
 )
 
 is_done() {  # is_done <run dir>: scalars.json with Gurobi status 2 (optimal) or 9 (time limit)
-  [ -f "$1/scalars.json" ] && python3 -c \
+  # uv run python, not python3: Git Bash on Windows usually has no python3
+  [ -f "$1/scalars.json" ] && uv run --quiet python -c \
     'import json, sys; sys.exit(json.load(open(sys.argv[1])).get("status") not in (2, 9))' \
     "$1/scalars.json"
 }
@@ -69,9 +70,14 @@ run_one() {  # run_one <group>/<n> key=value ...
   local args=()
   for k in "${!cfg[@]}"; do args+=("$k=${cfg[$k]}"); done
   echo "=== $(date +%T) $dir: $*"
-  # systemd-inhibit: no suspend while solving (suspends inflate the runtime)
-  systemd-inhibit --what=sleep --why="binary diagnostics $name" \
+  # Linux: systemd-inhibit blocks suspend while solving (suspends inflate the runtime).
+  # Windows (Git Bash) and macOS have no systemd-inhibit: run without it.
+  if command -v systemd-inhibit > /dev/null 2>&1; then
+    systemd-inhibit --what=sleep --why="binary diagnostics $name" \
+      uv run main.py "${args[@]}" hydra.run.dir="$dir"
+  else
     uv run main.py "${args[@]}" hydra.run.dir="$dir"
+  fi
 }
 
 both() {  # both <group> key=value ...: joint objective (n = 1) first, then nbs (n = 0)
