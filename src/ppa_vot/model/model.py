@@ -15,6 +15,8 @@ class BilevelModel:
         self.add_v()
         self.add_cons()
         self.add_objective()
+        if data.guess:
+            self.add_start()
 
     def configure_model(self):
         solver_dict = self.cfg.simulations.solver
@@ -160,6 +162,24 @@ class BilevelModel:
             expr = v.w_G + v.w_L
         self.m.setObjective(expr=expr, sense=gp.GRB.MAXIMIZE)
         log.info("objective: %s", self.data.objective)
+
+    def add_start(self):
+        # Partial MIP start: only S and V are given. Gurobi completes the other variables by
+        # solving the model with them fixed, and keeps the result as the first incumbent.
+        # It is a starting point, not a constraint: the search still covers the whole range of V.
+        # The bounds of the guess are checked in DataLoader.
+        data, v = self.data, self.v
+        V, S = data.guess_volume, data.guess_strike
+        if data.binary:
+            # V must be on the grid: V = delta_V * n, n written in binary digits z_k
+            n = int(round(V / data.delta_V))
+            V = n * data.delta_V
+            v.z.Start = [(n >> k) & 1 for k in range(len(self.weights))]
+        v.V.Start = V
+        # a wrong strike makes the start infeasible (w_G or w_L below epsilon), so it is optional
+        if S is not None:
+            v.aux_sv.Start = S * V  # aux_sv = S V
+        log.info("MIP start: V = %g, S = %s", V, S)
 
     def solve(self):
         # self.m.Params.TimeLimit = 1800  # seconds; the exporter keeps the best solution found

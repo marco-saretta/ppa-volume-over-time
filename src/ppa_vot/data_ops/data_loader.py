@@ -31,6 +31,9 @@ class DataLoader:
     quota_upper: float = field(init=False)
     binary: bool = field(init=False)  # True: binary expansion of V; False: bilinear rho V
     delta_V: float = field(init=False)  # grid step of V in the binary expansion
+    guess: bool = field(init=False)  # True: give Gurobi a starting point (MIP start) for S and V
+    guess_strike: float | None = field(init=False)  # EUR/MWh, None: no strike in the start
+    guess_volume: float = field(init=False)  # MWh per week
 
     # cardinalities of the sets H (hours of a week), T (weeks), Omega (scenarios)
     n_H: int = field(init=False)
@@ -73,6 +76,17 @@ class DataLoader:
         self.quota_upper = sim.contract.quota_upper
         self.binary = sim.binary_expansion.do
         self.delta_V = sim.binary_expansion.delta_V
+        self.guess = sim.contract.guess.do
+        self.guess_strike = sim.contract.guess.strike  # None: let Gurobi complete the strike
+        self.guess_volume = sim.contract.guess.volume
+        if self.guess:
+            V, S = self.guess_volume, self.guess_strike
+            assert self.volume_lower <= V <= self.volume_upper, (
+                f"guess V = {V} outside the V bounds"
+            )
+            assert S is None or self.strike_lower <= S <= self.strike_upper, (
+                f"guess S = {S} outside the S bounds"
+            )
         log.info("Parameters read from cfg.simulations.model (%s)", self.cfg.simulations.name)
 
     def load_scenarios(self):

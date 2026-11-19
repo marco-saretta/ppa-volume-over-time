@@ -6,7 +6,7 @@ name: demo
 
 # SCENARIO GENERATION
 data:
-  scenarios: 150             # |Omega|, bootstrapped scenarios (test size; final: 100)
+  scenarios: 100             # |Omega|, bootstrapped scenarios (test size; final: 100)
   weeks: 3                 # |T|, weeks per scenario, drawn from history (test size; final: 48)
   seed: 42                  # random seed of the bootstrap
 
@@ -34,6 +34,11 @@ model:
     volume_upper: 600        # MWh per week, upper bound on V
     quota_lower: 0.1        # MWh per hour, floor on q
     quota_upper: 10         # MWh per hour, cap on q
+
+    guess:
+      do: true
+      strike: 25
+      volume: 350
 
   binary_expansion:          # how the bilinear term rho V in strong duality is handled
     do: false                # true: binary expansion of V (MILP); false: bilinear rho V (Gurobi NonConvex)
