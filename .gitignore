@@ -5,6 +5,7 @@ overleaf/
 # Data / generated outputs
 /data/
 outputs/
+multirun/*
 results/
 presentations/*
 

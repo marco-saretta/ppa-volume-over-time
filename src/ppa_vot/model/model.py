@@ -17,10 +17,18 @@ class BilevelModel:
         self.add_objective()
 
     def configure_model(self):
+        solver_dict = self.cfg.simulations.solver
         env = gp.Env(empty=True)
         env.setParam("LogToConsole", 0)
         env.start()
         self.m = gp.Model(env=env)
+
+        # solver params
+        self.m.setParam("MIPGap", solver_dict.MIPGap)
+        self.m.setParam("NumericFocus", solver_dict.NumericFocus)
+        self.m.setParam("FeasibilityTol", solver_dict.FeasibilityTol)
+        self.m.setParam("OptimalityTol", solver_dict.OptimalityTol)
+
         log.info("model setup")
 
     def add_v(self):
